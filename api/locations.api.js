@@ -4,6 +4,10 @@ const { validationResult, body } = require("express-validator");
 const logger = require("../config/winston");
 
 const LocationService = require("../services/LocationService");
+const {
+	HttpUnauthorized,
+	HttpUnprocessableEntity,
+} = require("../utils/HttpError");
 
 /**
  * @param {import('express').Express} app
@@ -39,8 +43,13 @@ module.exports = (app) => {
 		async (req, res) => {
 			try {
 				logger.info({
-					GET_LOCATIONS_REQUEST: {},
+					GET_LOCATIONS_REQUEST: {
+						role: req.role,
+					},
 				});
+
+				if (req.role !== "ADMIN")
+					throw new HttpUnauthorized("Unauthorized", []);
 
 				const result = await service.GetLocations();
 
@@ -75,7 +84,6 @@ module.exports = (app) => {
 		/**
 		 * @param {import('express').Request} req
 		 * @param {import('express').Response} res
-		 * @returns
 		 */
 		async (req, res) => {
 			try {
@@ -111,4 +119,68 @@ module.exports = (app) => {
 		}
 	);
 
+	app.post(
+		"/admin_locations/api/v1/locations",
+		[
+			AccessTokenVerifier,
+			body("name")
+				.notEmpty()
+				.withMessage("Missing required property: name")
+				.escape()
+				.trim(),
+			body("address")
+				.notEmpty()
+				.withMessage("Missing required property: address")
+				.escape()
+				.trim(),
+		],
+
+		/**
+		 * @param {import('express').Request} req
+		 * @param {import('express').Response} res
+		 */
+		async (req, res) => {
+			try {
+				logger.info({
+					REGISTER_LOCATION_REQUEST: {
+						role: req.role,
+						data: {
+							...req.body,
+						},
+					},
+				});
+
+				if (req.role !== "ADMIN")
+					throw new HttpUnauthorized("Unauthorized", []);
+
+				validate(req, res);
+
+				const { name, address } = req.body;
+
+				const result = await service.RegisterLocation({ name, address });
+
+				logger.info({
+					REGISTER_LOCATION_RESPONSE: {
+						message: "SUCCESS",
+					},
+				});
+
+				return res
+					.status(200)
+					.json({ status: 200, data: result, message: "Success" });
+			} catch (err) {
+				logger.error({
+					REGISTER_LOCATION_ERROR: {
+						err,
+						message: err.message,
+					},
+				});
+				return res.status(err.status || 500).json({
+					status: err.status || 500,
+					data: err.data || [],
+					message: err.message || "Internal Server Error",
+				});
+			}
+		}
+	);
 };
