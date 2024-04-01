@@ -77,4 +77,19 @@ module.exports = class LocationRepository {
 			});
 		});
 	}
+
+	BindLocation(cpoOwnerID, locationID) {
+		const QUERY = `CALL WEB_ADMIN_BIND_LOCATION(?,?)`;
+
+		console.log(cpoOwnerID, locationID);
+		return new Promise((resolve, reject) => {
+			mysql.query(QUERY, [cpoOwnerID, locationID], (err, result) => {
+				if (err) {
+					reject(err);
+				}
+
+				resolve(result);
+			});
+		});
+	}
 };

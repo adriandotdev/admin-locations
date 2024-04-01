@@ -109,4 +109,12 @@ module.exports = class LocationService {
 
 		return result;
 	}
+
+	async BindLocation(cpoOwnerID, locationID) {
+		const result = await this.#repository.BindLocation(cpoOwnerID, locationID);
+
+		const status = result[0][0].STATUS;
+
+		return status;
+	}
 };

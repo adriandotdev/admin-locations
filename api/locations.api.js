@@ -233,4 +233,51 @@ module.exports = (app) => {
 			}
 		}
 	);
+
+	app.patch(
+		"/admin_locations/api/v1/locations/bind/:location_id/:cpo_owner_id",
+		[AccessTokenVerifier],
+
+		/**
+		 * @param {import('express').Request} req
+		 * @param {import('express').Response} res
+		 */
+		async (req, res) => {
+			try {
+				logger.info({
+					BIND_LOCATION_TO_CPO_REQUEST: {
+						role: req.role,
+						location_id: req.params.location_id,
+						cpo_owner_id: req.params.cpo_owner_id,
+					},
+				});
+
+				const { location_id, cpo_owner_id } = req.params;
+
+				const result = await service.BindLocation(cpo_owner_id, location_id);
+
+				logger.info({
+					BIND_LOCATION_TO_CPO_RESPONSE: {
+						message: "SUCCESS",
+					},
+				});
+
+				return res
+					.status(200)
+					.json({ status: 200, data: result, message: "Success" });
+			} catch (err) {
+				logger.error({
+					BIND_LOCATION_TO_CPO_ERROR: {
+						err,
+						message: err.message,
+					},
+				});
+				return res.status(err.status || 500).json({
+					status: err.status || 500,
+					data: err.data || [],
+					message: err.message || "Internal Server Error",
+				});
+			}
+		}
+	);
 };
