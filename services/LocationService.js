@@ -12,4 +12,11 @@ module.exports = class LocationService {
 
 		return result;
 	}
+
+	async GetUnbindedLocations() {
+		const result = await this.#repository.GetUnbindedLocations();
+
+		return result;
+	}
+
 };

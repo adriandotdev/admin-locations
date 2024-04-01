@@ -67,4 +67,48 @@ module.exports = (app) => {
 			}
 		}
 	);
+
+	app.get(
+		"/admin_locations/api/v1/locations/unbinded",
+		[AccessTokenVerifier],
+
+		/**
+		 * @param {import('express').Request} req
+		 * @param {import('express').Response} res
+		 * @returns
+		 */
+		async (req, res) => {
+			try {
+				logger.info({ GET_UNBINDED_LOCATIONS_REQUEST: { role: req.role } });
+
+				if (req.role !== "ADMIN")
+					throw new HttpUnauthorized("Unauthorized", []);
+
+				const result = await service.GetUnbindedLocations();
+
+				logger.info({
+					GET_UNBINDED_LOCATIONS_RESPONSE: {
+						message: "SUCCESS",
+					},
+				});
+
+				return res
+					.status(200)
+					.json({ status: 200, data: result, message: "Success" });
+			} catch (err) {
+				logger.error({
+					GET_UNBINDED_LOCATIONS_ERROR: {
+						err,
+						message: err.message,
+					},
+				});
+				return res.status(err.status || 500).json({
+					status: err.status || 500,
+					data: err.data || [],
+					message: err.message || "Internal Server Error",
+				});
+			}
+		}
+	);
+
 };

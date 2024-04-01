@@ -14,4 +14,18 @@ module.exports = class LocationRepository {
 			});
 		});
 	}
+
+	GetUnbindedLocations() {
+		const QUERY = `SELECT * FROM cpo_locations WHERE cpo_owner_id IS NULL`;
+
+		return new Promise((resolve, reject) => {
+			mysql.query(QUERY, (err, result) => {
+				if (err) {
+					reject(err);
+				}
+
+				resolve(result);
+			});
+		});
+	}
 };
