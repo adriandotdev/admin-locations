@@ -29,16 +29,25 @@ module.exports = class LocationRepository {
 		});
 	}
 
-	RegisterLocation({ name, address, lat, lng, city, region, postal_code }) {
+	RegisterLocation({
+		cpo_owner_id,
+		name,
+		address,
+		lat,
+		lng,
+		city,
+		region,
+		postal_code,
+	}) {
 		const QUERY = `
-			INSERT INTO cpo_locations (name, address, address_lat, address_lng, city, region, postal_code, date_created, date_modified)
-			VALUES (?,?,?,?,?,?,?, NOW(), NOW());
+			INSERT INTO cpo_locations (cpo_owner_id, name, address, address_lat, address_lng, city, region, postal_code, date_created, date_modified)
+			VALUES (?,?,?,?,?,?,?,?, NOW(), NOW());
 		`;
 
 		return new Promise((resolve, reject) => {
 			mysql.query(
 				QUERY,
-				[name, address, lat, lng, city, region, postal_code],
+				[cpo_owner_id, name, address, lat, lng, city, region, postal_code],
 				(err, result) => {
 					if (err) {
 						reject(err);

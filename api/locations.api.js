@@ -155,9 +155,13 @@ module.exports = (app) => {
 
 				validate(req, res);
 
-				const { name, address } = req.body;
+				const { cpo_owner_id, name, address } = req.body;
 
-				const result = await service.RegisterLocation({ name, address });
+				const result = await service.RegisterLocation({
+					cpo_owner_id,
+					name,
+					address,
+				});
 
 				logger.info({
 					REGISTER_LOCATION_RESPONSE: {

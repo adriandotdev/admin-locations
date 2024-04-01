@@ -24,7 +24,7 @@ module.exports = class LocationService {
 		return result;
 	}
 
-	async RegisterLocation({ name, address }) {
+	async RegisterLocation({ cpo_owner_id, name, address }) {
 		const geocodedAddress = await axios.get(
 			`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURI(
 				address
@@ -78,18 +78,29 @@ module.exports = class LocationService {
 				data: geocodedAddress.data,
 			},
 		});
-		const result = await this.#repository.RegisterLocation({
-			name,
-			address: formatted_address,
-			lat,
-			lng,
-			city,
-			region,
-			postal_code: postal_code || null,
-		});
 
-		if (result.affectedRows >= 1) return "SUCCESS";
+		try {
+			const result = await this.#repository.RegisterLocation({
+				cpo_owner_id: cpo_owner_id || null,
+				name,
+				address: formatted_address,
+				lat,
+				lng,
+				city,
+				region,
+				postal_code: postal_code || null,
+			});
 
-		return result;
+			if (result.affectedRows >= 1) return "SUCCESS";
+
+			return result;
+		} catch (err) {
+			if (
+				err.message.includes(
+					"Cannot add or update a child row: a foreign key constraint fails"
+				)
+			)
+				throw new HttpBadRequest("CPO_OWNER_ID_DOES_NOT_EXISTS");
+		}
 	}
 };
