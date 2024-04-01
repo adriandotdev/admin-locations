@@ -187,4 +187,50 @@ module.exports = (app) => {
 			}
 		}
 	);
+
+	app.get(
+		"/admin_locations/api/v1/locations/:cpo_owner_id",
+		[AccessTokenVerifier],
+
+		/**
+		 * @param {import('express').Request} req
+		 * @param {import('express').Response} res
+		 */
+		async (req, res) => {
+			try {
+				logger.info({
+					GET_LOCATIONS_BINDED_TO_CPO_REQUEST: {
+						role: req.role,
+						cpo_owner_id: req.params.cpo_owner_id,
+					},
+				});
+
+				const { cpo_owner_id } = req.params;
+
+				const result = await service.GetBindedLocations(cpo_owner_id);
+
+				logger.info({
+					GET_LOCATIONS_BINDED_TO_CPO_RESPONSE: {
+						message: "SUCCESS",
+					},
+				});
+
+				return res
+					.status(200)
+					.json({ status: 200, data: result, message: "Success" });
+			} catch (err) {
+				logger.error({
+					GET_LOCATIONS_BINDED_TO_CPO: {
+						err,
+						message: err.message,
+					},
+				});
+				return res.status(err.status || 500).json({
+					status: err.status || 500,
+					data: err.data || [],
+					message: err.message || "Internal Server Error",
+				});
+			}
+		}
+	);
 };

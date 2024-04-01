@@ -103,4 +103,10 @@ module.exports = class LocationService {
 				throw new HttpBadRequest("CPO_OWNER_ID_DOES_NOT_EXISTS");
 		}
 	}
+
+	async GetBindedLocations(cpoOwnerID) {
+		const result = await this.#repository.GetBindedLocations(cpoOwnerID);
+
+		return result;
+	}
 };

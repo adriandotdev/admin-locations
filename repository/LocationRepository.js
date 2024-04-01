@@ -58,4 +58,23 @@ module.exports = class LocationRepository {
 			);
 		});
 	}
+
+	GetBindedLocations(cpoOwnerID) {
+		const QUERY = `
+			SELECT * FROM cpo_locations 
+			WHERE cpo_owner_id =  ?
+			OR cpo_owner_id IS NULL
+			ORDER BY cpo_owner_id IS NULL
+		`;
+
+		return new Promise((resolve, reject) => {
+			mysql.query(QUERY, [cpoOwnerID], (err, result) => {
+				if (err) {
+					reject(err);
+				}
+
+				resolve(result);
+			});
+		});
+	}
 };
