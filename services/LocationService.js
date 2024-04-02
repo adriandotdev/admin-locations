@@ -12,8 +12,18 @@ module.exports = class LocationService {
 		this.#repository = new LocationRepository();
 	}
 
-	async GetLocations() {
-		const result = await this.#repository.GetLocations();
+	async GetLocations({ limit, offset }) {
+		if (typeof limit !== "number")
+			throw new HttpBadRequest(
+				"Invalid limit. Limit must be in type of number"
+			);
+
+		if (typeof offset !== "number")
+			throw new HttpBadRequest(
+				"Invalid offset. Limit must be in type of number"
+			);
+
+		const result = await this.#repository.GetLocations({ limit, offset });
 
 		return result;
 	}

@@ -52,7 +52,12 @@ module.exports = (app) => {
 				if (req.role !== "ADMIN")
 					throw new HttpUnauthorized("Unauthorized", []);
 
-				const result = await service.GetLocations();
+				const { limit, offset } = req.query;
+
+				const result = await service.GetLocations({
+					limit: parseInt(limit, 10) || 10,
+					offset: parseInt(offset, 10) || 0,
+				});
 
 				logger.info({
 					GET_LOCATIONS_RESPONSE: {

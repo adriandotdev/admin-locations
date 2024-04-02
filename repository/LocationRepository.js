@@ -1,11 +1,15 @@
 const mysql = require("../database/mysql");
 
 module.exports = class LocationRepository {
-	GetLocations() {
-		const QUERY = `SELECT * FROM cpo_locations`;
+	GetLocations({ limit, offset }) {
+		const QUERY = `
+			SELECT * 
+			FROM cpo_locations 
+			LIMIT ? OFFSET ?
+		`;
 
 		return new Promise((resolve, reject) => {
-			mysql.query(QUERY, (err, result) => {
+			mysql.query(QUERY, [limit, offset], (err, result) => {
 				if (err) {
 					reject(err);
 				}
