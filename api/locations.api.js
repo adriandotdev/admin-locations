@@ -1,4 +1,4 @@
-const { AccessTokenVerifier } = require("../middlewares/TokenMiddleware"); // Remove this if unused
+const TokenMiddleware = require("../middlewares/TokenMiddleware"); // Remove this if unused
 const { validationResult, body } = require("express-validator");
 
 const logger = require("../config/winston");
@@ -15,7 +15,7 @@ const {
  */
 module.exports = (app) => {
 	const service = new LocationService();
-
+	const tokenMiddleware = new TokenMiddleware();
 	/**
 	 * This function will be used by the express-validator for input validation,
 	 * and to be attached to APIs middleware.
@@ -35,7 +35,7 @@ module.exports = (app) => {
 
 	app.get(
 		"/admin_locations/api/v1/locations",
-		[AccessTokenVerifier],
+		[tokenMiddleware.AccessTokenVerifier()],
 
 		/**
 		 * @param {import('express').Request} req
@@ -85,7 +85,7 @@ module.exports = (app) => {
 
 	app.get(
 		"/admin_locations/api/v1/locations/unbinded",
-		[AccessTokenVerifier],
+		[tokenMiddleware.AccessTokenVerifier()],
 
 		/**
 		 * @param {import('express').Request} req
@@ -128,7 +128,7 @@ module.exports = (app) => {
 	app.post(
 		"/admin_locations/api/v1/locations",
 		[
-			AccessTokenVerifier,
+			tokenMiddleware.AccessTokenVerifier(),
 			body("name")
 				.notEmpty()
 				.withMessage("Missing required property: name")
@@ -196,7 +196,7 @@ module.exports = (app) => {
 
 	app.get(
 		"/admin_locations/api/v1/locations/:cpo_owner_id",
-		[AccessTokenVerifier],
+		[tokenMiddleware.AccessTokenVerifier()],
 
 		/**
 		 * @param {import('express').Request} req
@@ -242,7 +242,7 @@ module.exports = (app) => {
 
 	app.patch(
 		"/admin_locations/api/v1/locations/:action/:location_id/:cpo_owner_id",
-		[AccessTokenVerifier],
+		[tokenMiddleware.AccessTokenVerifier()],
 
 		/**
 		 * @param {import('express').Request} req
