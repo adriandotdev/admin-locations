@@ -7,6 +7,7 @@ const LocationService = require("../services/LocationService");
 const {
 	HttpUnauthorized,
 	HttpUnprocessableEntity,
+	HttpBadRequest,
 } = require("../utils/HttpError");
 
 /**
@@ -235,7 +236,7 @@ module.exports = (app) => {
 	);
 
 	app.patch(
-		"/admin_locations/api/v1/locations/bind/:location_id/:cpo_owner_id",
+		"/admin_locations/api/v1/locations/:action/:location_id/:cpo_owner_id",
 		[AccessTokenVerifier],
 
 		/**
@@ -252,9 +253,20 @@ module.exports = (app) => {
 					},
 				});
 
-				const { location_id, cpo_owner_id } = req.params;
+				const VALID_ACTIONS = ["bind", "unbind"];
 
-				const result = await service.BindLocation(cpo_owner_id, location_id);
+				const { action, location_id, cpo_owner_id } = req.params;
+
+				if (!VALID_ACTIONS.includes(action))
+					throw new HttpBadRequest(
+						"INVALID_ACTIONS: Valid actions are bind, and unbind only"
+					);
+
+				let result = undefined;
+
+				if (action === "bind")
+					result = await service.BindLocation(cpo_owner_id, location_id);
+				else result = await service.UnbindLocation(cpo_owner_id, location_id);
 
 				logger.info({
 					BIND_LOCATION_TO_CPO_RESPONSE: {

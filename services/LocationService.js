@@ -117,4 +117,15 @@ module.exports = class LocationService {
 
 		return status;
 	}
+
+	async UnbindLocation(cpoOwnerID, locationID) {
+		const result = await this.#repository.UnbindLocation(
+			cpoOwnerID,
+			locationID
+		);
+
+		const status = result[0][0].STATUS;
+
+		return status;
+	}
 };
