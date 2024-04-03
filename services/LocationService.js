@@ -125,6 +125,8 @@ module.exports = class LocationService {
 
 		const status = result[0][0].STATUS;
 
+		if (status !== "SUCCESS") throw new HttpBadRequest(status, []);
+
 		return status;
 	}
 
@@ -135,6 +137,8 @@ module.exports = class LocationService {
 		);
 
 		const status = result[0][0].STATUS;
+
+		if (status !== "SUCCESS") throw new HttpBadRequest(status, []);
 
 		return status;
 	}
