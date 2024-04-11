@@ -1,4 +1,9 @@
 const TokenMiddleware = require("../middlewares/TokenMiddleware"); // Remove this if unused
+const {
+	ROLES,
+	RoleManagementMiddleware,
+} = require("../middlewares/RoleManagementMiddleware");
+
 const { validationResult, body } = require("express-validator");
 
 const logger = require("../config/winston");
@@ -16,6 +21,7 @@ const {
 module.exports = (app) => {
 	const service = new LocationService();
 	const tokenMiddleware = new TokenMiddleware();
+	const roleMiddleware = new RoleManagementMiddleware();
 	/**
 	 * This function will be used by the express-validator for input validation,
 	 * and to be attached to APIs middleware.
@@ -35,7 +41,14 @@ module.exports = (app) => {
 
 	app.get(
 		"/admin_locations/api/v1/locations",
-		[tokenMiddleware.AccessTokenVerifier()],
+		[
+			tokenMiddleware.AccessTokenVerifier(),
+			roleMiddleware.CheckRole(
+				ROLES.ADMIN,
+				ROLES.ADMIN_MARKETING,
+				ROLES.ADMIN_NOC
+			),
+		],
 
 		/**
 		 * @param {import('express').Request} req
@@ -48,9 +61,6 @@ module.exports = (app) => {
 						role: req.role,
 					},
 				});
-
-				if (req.role !== "ADMIN")
-					throw new HttpUnauthorized("Unauthorized", []);
 
 				const { limit, offset } = req.query;
 
@@ -85,7 +95,14 @@ module.exports = (app) => {
 
 	app.get(
 		"/admin_locations/api/v1/locations/unbinded",
-		[tokenMiddleware.AccessTokenVerifier()],
+		[
+			tokenMiddleware.AccessTokenVerifier(),
+			roleMiddleware.CheckRole(
+				ROLES.ADMIN,
+				ROLES.ADMIN_MARKETING,
+				ROLES.ADMIN_NOC
+			),
+		],
 
 		/**
 		 * @param {import('express').Request} req
@@ -94,9 +111,6 @@ module.exports = (app) => {
 		async (req, res) => {
 			try {
 				logger.info({ GET_UNBINDED_LOCATIONS_REQUEST: { role: req.role } });
-
-				if (req.role !== "ADMIN")
-					throw new HttpUnauthorized("Unauthorized", []);
 
 				const result = await service.GetUnbindedLocations();
 
@@ -129,6 +143,11 @@ module.exports = (app) => {
 		"/admin_locations/api/v1/locations",
 		[
 			tokenMiddleware.AccessTokenVerifier(),
+			roleMiddleware.CheckRole(
+				ROLES.ADMIN,
+				ROLES.ADMIN_MARKETING,
+				ROLES.ADMIN_NOC
+			),
 			body("name")
 				.notEmpty()
 				.withMessage("Missing required property: name")
@@ -155,9 +174,6 @@ module.exports = (app) => {
 						},
 					},
 				});
-
-				if (req.role !== "ADMIN")
-					throw new HttpUnauthorized("Unauthorized", []);
 
 				validate(req, res);
 
@@ -196,7 +212,14 @@ module.exports = (app) => {
 
 	app.get(
 		"/admin_locations/api/v1/locations/:cpo_owner_id",
-		[tokenMiddleware.AccessTokenVerifier()],
+		[
+			tokenMiddleware.AccessTokenVerifier(),
+			roleMiddleware.CheckRole(
+				ROLES.ADMIN,
+				ROLES.ADMIN_MARKETING,
+				ROLES.ADMIN_NOC
+			),
+		],
 
 		/**
 		 * @param {import('express').Request} req
@@ -242,7 +265,14 @@ module.exports = (app) => {
 
 	app.patch(
 		"/admin_locations/api/v1/locations/:action/:location_id/:cpo_owner_id",
-		[tokenMiddleware.AccessTokenVerifier()],
+		[
+			tokenMiddleware.AccessTokenVerifier(),
+			roleMiddleware.CheckRole(
+				ROLES.ADMIN,
+				ROLES.ADMIN_MARKETING,
+				ROLES.ADMIN_NOC
+			),
+		],
 
 		/**
 		 * @param {import('express').Request} req
