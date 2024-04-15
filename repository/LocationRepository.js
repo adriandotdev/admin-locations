@@ -109,4 +109,90 @@ module.exports = class LocationRepository {
 			});
 		});
 	}
+
+	GetDefaultFacilities() {
+		const QUERY = `SELECT * FROM facilities`;
+
+		return new Promise((resolve, reject) => {
+			mysql.query(QUERY, (err, result) => {
+				if (err) {
+					reject(err);
+				}
+
+				resolve(result);
+			});
+		});
+	}
+
+	AddLocationFacilities(facilities) {
+		const QUERY = `INSERT INTO cpo_location_facilities (facility_id, cpo_location_id)
+		VALUES ?`;
+
+		return new Promise((resolve, reject) => {
+			mysql.query(QUERY, [facilities], (err, result) => {
+				if (err) {
+					reject(err);
+				}
+
+				resolve(result);
+			});
+		});
+	}
+
+	GetDefaultParkingTypes() {
+		const QUERY = `SELECT * FROM parking_types`;
+
+		return new Promise((resolve, reject) => {
+			mysql.query(QUERY, (err, result) => {
+				if (err) {
+					reject(err);
+				}
+
+				resolve(result);
+			});
+		});
+	}
+
+	AddLocationParkingTypes(parkingTypes) {
+		const QUERY = `INSERT INTO cpo_location_parking_types (parking_type_id, cpo_location_id, tag)
+		VALUES ?`;
+
+		return new Promise((resolve, reject) => {
+			mysql.query(QUERY, [parkingTypes], (err, result) => {
+				if (err) {
+					reject(err);
+				}
+
+				resolve(result);
+			});
+		});
+	}
+
+	GetDefaultParkingRestrictions() {
+		const QUERY = `SELECT * FROM parking_restrictions`;
+
+		return new Promise((resolve, reject) => {
+			mysql.query(QUERY, (err, result) => {
+				if (err) {
+					reject(err);
+				}
+				resolve(result);
+			});
+		});
+	}
+
+	AddLocationParkingRestrictions(parkingRestrictions) {
+		const QUERY = `INSERT INTO cpo_location_parking_restrictions (parking_restriction_code_id, cpo_location_id)
+		VALUES ?`;
+
+		return new Promise((resolve, reject) => {
+			mysql.query(QUERY, [parkingRestrictions], (err, result) => {
+				if (err) {
+					reject(err);
+				}
+
+				resolve(result);
+			});
+		});
+	}
 };

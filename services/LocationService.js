@@ -34,7 +34,14 @@ module.exports = class LocationService {
 		return result;
 	}
 
-	async RegisterLocation({ cpo_owner_id, name, address }) {
+	async RegisterLocation({
+		cpo_owner_id,
+		name,
+		address,
+		facilities,
+		parking_types,
+		parking_restrictions,
+	}) {
 		const geocodedAddress = await axios.get(
 			`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURI(
 				address
@@ -83,11 +90,11 @@ module.exports = class LocationService {
 		// 	}`
 		// );
 
-		logger.info({
-			GEOCODE_ADDRESS_DATA: {
-				data: geocodedAddress.data,
-			},
-		});
+		// logger.info({
+		// 	GEOCODE_ADDRESS_DATA: {
+		// 		data: geocodedAddress.data,
+		// 	},
+		// });
 
 		try {
 			const result = await this.#repository.RegisterLocation({
@@ -101,7 +108,31 @@ module.exports = class LocationService {
 				postal_code: postal_code || null,
 			});
 
-			if (result.affectedRows >= 1) return "SUCCESS";
+			const newFacilities = facilities.map((facility) => [
+				facility,
+				result.insertId,
+			]);
+
+			await this.#repository.AddLocationFacilities(newFacilities);
+
+			const newParkingTypes = parking_types.map((parkingType) => [
+				parkingType.id,
+				result.insertId,
+				parkingType.tag,
+			]);
+
+			await this.#repository.AddLocationParkingTypes(newParkingTypes);
+
+			const newParkingRestrictions = parking_restrictions.map(
+				(parking_restriction) => [parking_restriction, result.insertId]
+			);
+
+			const parkingRestrictionsResult =
+				await this.#repository.AddLocationParkingRestrictions(
+					newParkingRestrictions
+				);
+
+			if (parkingRestrictionsResult.affectedRows >= 1) return "SUCCESS";
 
 			return result;
 		} catch (err) {
@@ -141,5 +172,14 @@ module.exports = class LocationService {
 		if (status !== "SUCCESS") throw new HttpBadRequest(status, []);
 
 		return status;
+	}
+
+	async GetDefaultData() {
+		const facilities = await this.#repository.GetDefaultFacilities();
+		const parking_types = await this.#repository.GetDefaultParkingTypes();
+		const parking_restrictions =
+			await this.#repository.GetDefaultParkingRestrictions();
+
+		return { facilities, parking_types, parking_restrictions };
 	}
 };

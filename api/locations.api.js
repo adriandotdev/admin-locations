@@ -158,6 +158,21 @@ module.exports = (app) => {
 				.withMessage("Missing required property: address")
 				.escape()
 				.trim(),
+			body("facilities")
+				.isArray()
+				.withMessage("Property: facilities must be in type of array"),
+			body("parking_types")
+				.isArray()
+				.withMessage("Property: parking_types must be in type of array"),
+			body("parking_types.*.id")
+				.notEmpty()
+				.withMessage("Missing required parking type property: id"),
+			body("parking_types.*.tag")
+				.notEmpty()
+				.withMessage("Missing required parking type property: tag"),
+			body("parking_restrictions")
+				.isArray()
+				.withMessage("Property: parking_restrictions must be in type of array"),
 		],
 
 		/**
@@ -177,12 +192,22 @@ module.exports = (app) => {
 
 				validate(req, res);
 
-				const { cpo_owner_id, name, address } = req.body;
+				const {
+					cpo_owner_id,
+					name,
+					address,
+					facilities,
+					parking_types,
+					parking_restrictions,
+				} = req.body;
 
 				const result = await service.RegisterLocation({
 					cpo_owner_id,
 					name,
 					address,
+					facilities,
+					parking_types,
+					parking_restrictions,
 				});
 
 				logger.info({
@@ -319,6 +344,50 @@ module.exports = (app) => {
 						message: err.message,
 					},
 				});
+				return res.status(err.status || 500).json({
+					status: err.status || 500,
+					data: err.data || [],
+					message: err.message || "Internal Server Error",
+				});
+			}
+		}
+	);
+
+	app.get(
+		"/admin_locations/api/v1/locations/data/defaults",
+		[tokenMiddleware.BasicTokenVerifier()],
+
+		/**
+		 * @param {import('express').Request} req
+		 * @param {import('express').Response} res
+		 */
+		async (req, res) => {
+			try {
+				logger.info({
+					GET_DEFAULT_FACILITIES_REQUEST: {
+						message: "SUCCESS",
+					},
+				});
+
+				const result = await service.GetDefaultData();
+
+				logger.info({
+					GET_DEFAULT_FACILITIES_RESPONSE: {
+						message: "SUCCESS",
+					},
+				});
+
+				return res
+					.status(200)
+					.json({ status: 200, data: result, message: "Success" });
+			} catch (err) {
+				logger.error({
+					GET_DEFAULT_FACILITIES_ERROR: {
+						err,
+						message: err.message,
+					},
+				});
+
 				return res.status(err.status || 500).json({
 					status: err.status || 500,
 					data: err.data || [],
