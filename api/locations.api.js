@@ -10,7 +10,6 @@ const logger = require("../config/winston");
 
 const LocationService = require("../services/LocationService");
 const {
-	HttpUnauthorized,
 	HttpUnprocessableEntity,
 	HttpBadRequest,
 } = require("../utils/HttpError");

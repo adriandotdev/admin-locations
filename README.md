@@ -48,8 +48,16 @@ Registers location.
 
 ```json
 {
-	"name": "Petron: Charging Station",
-	"address": "BGC, Taguig, Market-Market"
+	"name": "Nads: Charging Station",
+	"address": "BGC, Taguig, Market-Market",
+	"facilities": [1, 2], // Pass only the id of facilities
+	"parking_types": [
+		{
+			"id": 1,
+			"tag": "OUTDOOR"
+		}
+	], // Pass only the id of parking types together with its tag (Outdoor, Indoor, Both)
+	"parking_restrictions": [1, 2, 3] // Pass only the id of parking restrictions
 }
 ```
 
