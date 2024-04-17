@@ -363,7 +363,7 @@ module.exports = (app) => {
 		async (req, res) => {
 			try {
 				logger.info({
-					GET_DEFAULT_FACILITIES_REQUEST: {
+					GET_DEFAULT_DATA_REQUEST: {
 						message: "SUCCESS",
 					},
 				});
@@ -371,7 +371,7 @@ module.exports = (app) => {
 				const result = await service.GetDefaultData();
 
 				logger.info({
-					GET_DEFAULT_FACILITIES_RESPONSE: {
+					GET_DEFAULT_DATA_RESPONSE: {
 						message: "SUCCESS",
 					},
 				});
@@ -381,7 +381,7 @@ module.exports = (app) => {
 					.json({ status: 200, data: result, message: "Success" });
 			} catch (err) {
 				logger.error({
-					GET_DEFAULT_FACILITIES_ERROR: {
+					GET_DEFAULT_DATA_ERROR: {
 						err,
 						message: err.message,
 					},
