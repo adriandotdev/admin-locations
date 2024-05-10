@@ -57,7 +57,10 @@ module.exports = (app) => {
 			try {
 				logger.info({
 					GET_LOCATIONS_REQUEST: {
-						role: req.role,
+						data: {
+							role: req.role,
+						},
+						message: "SUCCESS",
 					},
 				});
 
@@ -73,21 +76,13 @@ module.exports = (app) => {
 						message: "SUCCESS",
 					},
 				});
+
 				return res
 					.status(200)
 					.json({ status: 200, data: result, message: "Success" });
 			} catch (err) {
-				logger.error({
-					GET_LOCATIONS_ERROR: {
-						err,
-						message: err.message,
-					},
-				});
-				return res.status(err.status || 500).json({
-					status: err.status || 500,
-					data: err.data || [],
-					message: err.message || "Internal Server Error",
-				});
+				req.error_name = "GET_LOCATIONS_ERROR";
+				next(err);
 			}
 		}
 	);
@@ -107,9 +102,16 @@ module.exports = (app) => {
 		 * @param {import('express').Request} req
 		 * @param {import('express').Response} res
 		 */
-		async (req, res) => {
+		async (req, res, next) => {
 			try {
-				logger.info({ GET_UNBINDED_LOCATIONS_REQUEST: { role: req.role } });
+				logger.info({
+					GET_UNBINDED_LOCATIONS_REQUEST: {
+						data: {
+							role: req.role,
+						},
+						message: "SUCCESS",
+					},
+				});
 
 				const result = await service.GetUnbindedLocations();
 
@@ -123,17 +125,8 @@ module.exports = (app) => {
 					.status(200)
 					.json({ status: 200, data: result, message: "Success" });
 			} catch (err) {
-				logger.error({
-					GET_UNBINDED_LOCATIONS_ERROR: {
-						err,
-						message: err.message,
-					},
-				});
-				return res.status(err.status || 500).json({
-					status: err.status || 500,
-					data: err.data || [],
-					message: err.message || "Internal Server Error",
-				});
+				req.error_name = "GET_UNBINDED_LOCATIONS_ERROR";
+				next(err);
 			}
 		}
 	);
@@ -178,14 +171,15 @@ module.exports = (app) => {
 		 * @param {import('express').Request} req
 		 * @param {import('express').Response} res
 		 */
-		async (req, res) => {
+		async (req, res, next) => {
 			try {
 				logger.info({
 					REGISTER_LOCATION_REQUEST: {
-						role: req.role,
 						data: {
+							role: req.role,
 							...req.body,
 						},
+						message: "SUCCESS",
 					},
 				});
 
@@ -219,17 +213,8 @@ module.exports = (app) => {
 					.status(200)
 					.json({ status: 200, data: result, message: "Success" });
 			} catch (err) {
-				logger.error({
-					REGISTER_LOCATION_ERROR: {
-						err,
-						message: err.message,
-					},
-				});
-				return res.status(err.status || 500).json({
-					status: err.status || 500,
-					data: err.data || [],
-					message: err.message || "Internal Server Error",
-				});
+				req.error_name = "REGISTER_LOCATION_ERROR";
+				next(err);
 			}
 		}
 	);
@@ -249,12 +234,15 @@ module.exports = (app) => {
 		 * @param {import('express').Request} req
 		 * @param {import('express').Response} res
 		 */
-		async (req, res) => {
+		async (req, res, next) => {
 			try {
 				logger.info({
 					GET_LOCATIONS_BINDED_TO_CPO_REQUEST: {
-						role: req.role,
-						cpo_owner_id: req.params.cpo_owner_id,
+						data: {
+							role: req.role,
+							cpo_owner_id: req.params.cpo_owner_id,
+						},
+						message: "SUCCESS",
 					},
 				});
 
@@ -272,17 +260,8 @@ module.exports = (app) => {
 					.status(200)
 					.json({ status: 200, data: result, message: "Success" });
 			} catch (err) {
-				logger.error({
-					GET_LOCATIONS_BINDED_TO_CPO: {
-						err,
-						message: err.message,
-					},
-				});
-				return res.status(err.status || 500).json({
-					status: err.status || 500,
-					data: err.data || [],
-					message: err.message || "Internal Server Error",
-				});
+				req.error_name = "GET_LOCATIONS_BINDED_TO_CPO_ERROR";
+				next(err);
 			}
 		}
 	);
@@ -302,13 +281,16 @@ module.exports = (app) => {
 		 * @param {import('express').Request} req
 		 * @param {import('express').Response} res
 		 */
-		async (req, res) => {
+		async (req, res, next) => {
 			try {
 				logger.info({
 					BIND_LOCATION_TO_CPO_REQUEST: {
-						role: req.role,
-						location_id: req.params.location_id,
-						cpo_owner_id: req.params.cpo_owner_id,
+						data: {
+							role: req.role,
+							location_id: req.params.location_id,
+							cpo_owner_id: req.params.cpo_owner_id,
+						},
+						message: "SUCCESS",
 					},
 				});
 
@@ -337,17 +319,8 @@ module.exports = (app) => {
 					.status(200)
 					.json({ status: 200, data: result, message: "Success" });
 			} catch (err) {
-				logger.error({
-					BIND_LOCATION_TO_CPO_ERROR: {
-						err,
-						message: err.message,
-					},
-				});
-				return res.status(err.status || 500).json({
-					status: err.status || 500,
-					data: err.data || [],
-					message: err.message || "Internal Server Error",
-				});
+				req.error_name = "BIND_LOCATION_TO_CPO_ERROR";
+				next(err);
 			}
 		}
 	);
@@ -360,7 +333,7 @@ module.exports = (app) => {
 		 * @param {import('express').Request} req
 		 * @param {import('express').Response} res
 		 */
-		async (req, res) => {
+		async (req, res, next) => {
 			try {
 				logger.info({
 					GET_DEFAULT_DATA_REQUEST: {
@@ -380,19 +353,34 @@ module.exports = (app) => {
 					.status(200)
 					.json({ status: 200, data: result, message: "Success" });
 			} catch (err) {
-				logger.error({
-					GET_DEFAULT_DATA_ERROR: {
-						err,
-						message: err.message,
-					},
-				});
-
-				return res.status(err.status || 500).json({
-					status: err.status || 500,
-					data: err.data || [],
-					message: err.message || "Internal Server Error",
-				});
+				req.error_name = "GET_DEFAULT_DATA_ERROR";
+				next(err);
 			}
 		}
 	);
+
+	app.use((err, req, res, next) => {
+		logger.error({
+			API_REQUEST_ERROR: {
+				error_name: req.error_name || "UNKNOWN_ERROR",
+				message: err.message,
+				stack: err.stack.replace(/\\/g, "/"), // Include stack trace for debugging
+				request: {
+					method: req.method,
+					url: req.url,
+					code: err.status || 500,
+				},
+				data: err.data || [],
+			},
+		});
+
+		const status = err.status || 500;
+		const message = err.message || "Internal Server Error";
+
+		res.status(status).json({
+			status,
+			data: err.data || [],
+			message,
+		});
+	});
 };
