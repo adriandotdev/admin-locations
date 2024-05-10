@@ -3,8 +3,10 @@ const mysql = require("../database/mysql");
 module.exports = class LocationRepository {
 	GetLocations({ limit, offset }) {
 		const QUERY = `
-			SELECT * 
-			FROM cpo_locations 
+			SELECT 
+				* 
+			FROM 
+				cpo_locations 
 			LIMIT ? OFFSET ?
 		`;
 
@@ -20,7 +22,12 @@ module.exports = class LocationRepository {
 	}
 
 	GetUnbindedLocations() {
-		const QUERY = `SELECT * FROM cpo_locations WHERE cpo_owner_id IS NULL`;
+		const QUERY = `
+			SELECT 
+				* 
+			FROM 
+				cpo_locations 
+			WHERE cpo_owner_id IS NULL`;
 
 		return new Promise((resolve, reject) => {
 			mysql.query(QUERY, (err, result) => {
@@ -44,8 +51,11 @@ module.exports = class LocationRepository {
 		postal_code,
 	}) {
 		const QUERY = `
-			INSERT INTO cpo_locations (cpo_owner_id, name, address, address_lat, address_lng, city, region, postal_code, date_created, date_modified)
-			VALUES (?,?,?,?,?,?,?,?, NOW(), NOW());
+			INSERT INTO 
+				cpo_locations 
+					(cpo_owner_id, name, address, address_lat, address_lng, city, region, postal_code, date_created, date_modified)
+			VALUES 
+					(?,?,?,?,?,?,?,?, NOW(), NOW());
 		`;
 
 		return new Promise((resolve, reject) => {
@@ -65,9 +75,13 @@ module.exports = class LocationRepository {
 
 	GetBindedLocations(cpoOwnerID) {
 		const QUERY = `
-			SELECT * FROM cpo_locations 
-			WHERE cpo_owner_id =  ?
-			OR cpo_owner_id IS NULL
+			SELECT 
+				* 
+			FROM 
+				cpo_locations 
+			WHERE 
+				cpo_owner_id =  ?
+				OR cpo_owner_id IS NULL
 			ORDER BY cpo_owner_id IS NULL
 		`;
 
@@ -125,8 +139,12 @@ module.exports = class LocationRepository {
 	}
 
 	AddLocationFacilities(facilities) {
-		const QUERY = `INSERT INTO cpo_location_facilities (facility_id, cpo_location_id)
-		VALUES ?`;
+		const QUERY = `
+			INSERT INTO 
+				cpo_location_facilities 
+				(facility_id, cpo_location_id)
+			VALUES ?
+		`;
 
 		return new Promise((resolve, reject) => {
 			mysql.query(QUERY, [facilities], (err, result) => {
@@ -140,7 +158,12 @@ module.exports = class LocationRepository {
 	}
 
 	GetDefaultParkingTypes() {
-		const QUERY = `SELECT * FROM parking_types`;
+		const QUERY = `
+			SELECT 
+				* 
+			FROM 
+				parking_types
+		`;
 
 		return new Promise((resolve, reject) => {
 			mysql.query(QUERY, (err, result) => {
@@ -154,8 +177,11 @@ module.exports = class LocationRepository {
 	}
 
 	AddLocationParkingTypes(parkingTypes) {
-		const QUERY = `INSERT INTO cpo_location_parking_types (parking_type_id, cpo_location_id, tag)
-		VALUES ?`;
+		const QUERY = `
+			INSERT INTO 
+				cpo_location_parking_types (parking_type_id, cpo_location_id, tag)
+			VALUES ?
+		`;
 
 		return new Promise((resolve, reject) => {
 			mysql.query(QUERY, [parkingTypes], (err, result) => {
@@ -169,7 +195,11 @@ module.exports = class LocationRepository {
 	}
 
 	GetDefaultParkingRestrictions() {
-		const QUERY = `SELECT * FROM parking_restrictions`;
+		const QUERY = `
+			SELECT 
+				* 
+			FROM 
+				parking_restrictions`;
 
 		return new Promise((resolve, reject) => {
 			mysql.query(QUERY, (err, result) => {
@@ -182,8 +212,11 @@ module.exports = class LocationRepository {
 	}
 
 	AddLocationParkingRestrictions(parkingRestrictions) {
-		const QUERY = `INSERT INTO cpo_location_parking_restrictions (parking_restriction_code_id, cpo_location_id)
-		VALUES ?`;
+		const QUERY = `
+			INSERT INTO 
+				cpo_location_parking_restrictions (parking_restriction_code_id, cpo_location_id)
+			VALUES ?
+		`;
 
 		return new Promise((resolve, reject) => {
 			mysql.query(QUERY, [parkingRestrictions], (err, result) => {
