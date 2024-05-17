@@ -17,7 +17,7 @@ const {
 /**
  * @param {import('express').Express} app
  */
-module.exports = (app) => {
+module.exports = (app, upload) => {
 	const service = new LocationService();
 	const tokenMiddleware = new TokenMiddleware();
 	const roleMiddleware = new RoleManagementMiddleware();
@@ -165,6 +165,9 @@ module.exports = (app) => {
 			body("parking_restrictions")
 				.isArray()
 				.withMessage("Property: parking_restrictions must be in type of array"),
+			body("images")
+				.isArray()
+				.withMessage("Property: images must be in type of array"),
 		],
 
 		/**
@@ -192,6 +195,7 @@ module.exports = (app) => {
 					facilities,
 					parking_types,
 					parking_restrictions,
+					images,
 				} = req.body;
 
 				const result = await service.RegisterLocation({
@@ -201,6 +205,7 @@ module.exports = (app) => {
 					facilities,
 					parking_types,
 					parking_restrictions,
+					images,
 				});
 
 				logger.info({
@@ -356,6 +361,28 @@ module.exports = (app) => {
 				req.error_name = "GET_DEFAULT_DATA_ERROR";
 				next(err);
 			}
+		}
+	);
+
+	app.post(
+		"/admin_locations/api/v1/locations/upload",
+		[tokenMiddleware.AccessTokenVerifier(), upload.array("images", 5)],
+
+		/**
+		 * @param {import('express').Request} req
+		 * @param {import('express').Response} res
+		 */
+		async (req, res, next) => {
+			try {
+				console.log(req.files);
+			} catch (err) {
+				req.error_name = "UPLOAD_LOCATION_IMAGES_ERROR";
+				next(err);
+			}
+
+			return res
+				.status(200)
+				.json({ status: 200, data: [], message: "Success" });
 		}
 	);
 
