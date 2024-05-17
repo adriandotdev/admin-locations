@@ -49,6 +49,7 @@ module.exports = class LocationService {
 		facilities,
 		parking_types,
 		parking_restrictions,
+		images,
 	}) {
 		// Request to Google Geocoding API for the data based on the address provided.
 		const geocodedAddress = await axios.get(
@@ -111,6 +112,7 @@ module.exports = class LocationService {
 				city,
 				region,
 				postal_code: postal_code || null,
+				images: JSON.stringify(images),
 			});
 
 			const LOCATION_ID = result.insertId;

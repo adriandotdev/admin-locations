@@ -8,6 +8,7 @@ require("dotenv").config({
 });
 
 const express = require("express");
+const multer = require("multer");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
@@ -23,6 +24,41 @@ const logger = require("./config/winston");
 
 // Global Middlewares
 const swaggerDocument = YAML.load("./swagger.yaml");
+
+const storage = multer.diskStorage({
+	destination: function (req, file, cb) {
+		cb(null, path.join(__dirname, "public", path.sep, "images"));
+	},
+	filename: function (req, file, cb) {
+		const date = Date.now();
+		const uploadFileName = file.originalname;
+		cb(null, uploadFileName);
+	},
+});
+
+const allowedFileTypes = (req, file, cb) => {
+	const fileTypes = [".png", ".svg", ".jpg", ".jpeg"];
+
+	const isFileTypeValid = fileTypes.includes(
+		path.extname(file.originalname).toLowerCase()
+	);
+
+	if (isFileTypeValid) {
+		return cb(null, true);
+	} else {
+		cb(
+			new multer.MulterError(
+				"Invalid file types. Please upload png or svg files with maximum 80 kilobytes in size."
+			)
+		);
+	}
+};
+
+const upload = multer({
+	storage: storage,
+	fileFilter: allowedFileTypes,
+	limits: { files: 5 },
+});
 
 app.use("/login/docs", swaggerUI.serve, swaggerUI.setup(swaggerDocument));
 app.use(helmet());
@@ -44,12 +80,12 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(morgan("combined", { stream: logger.stream }));
 app.use(cookieParser());
-
+app.use("/images", express.static(path.join(__dirname, "public/images")));
 /**
  * Import all of your routes below
  */
 // Import here
-require("./api/locations.api")(app);
+require("./api/locations.api")(app, upload);
 
 app.use("*", (req, res, next) => {
 	logger.error({
