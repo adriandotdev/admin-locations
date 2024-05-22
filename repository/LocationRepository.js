@@ -239,4 +239,26 @@ module.exports = class LocationRepository {
 			});
 		});
 	}
+
+	SearchLocationByName(name, limit, offset) {
+		const QUERY = `
+			SELECT 
+				* 
+			FROM 
+				cpo_locations 
+			WHERE 
+				LOWER(name) LIKE ?
+			LIMIT ${limit} OFFSET ${offset}
+		`;
+
+		return new Promise((resolve, reject) => {
+			mysql.query(QUERY, [`%${name}%`], (err, result) => {
+				if (err) {
+					reject(err);
+				}
+
+				resolve(result);
+			});
+		});
+	}
 };

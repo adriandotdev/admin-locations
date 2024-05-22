@@ -386,6 +386,46 @@ module.exports = (app, upload) => {
 		}
 	);
 
+	app.get(
+		"/admin_locations/api/v1/locations/:name/:limit/:offset",
+		[
+			tokenMiddleware.AccessTokenVerifier(),
+			roleMiddleware.CheckRole(ROLES.ADMIN_NOC, ROLES.ADMIN_MARKETING),
+		],
+		/**
+		 * @param {import('express').Request} req
+		 * @param {import('express').Response} res
+		 */
+		async (req, res, next) => {
+			try {
+				const { name, limit, offset } = req.params;
+				logger.info({
+					SEARCH_LOCATION_BY_NAME_REQUEST: {
+						data: { name, limit, offset },
+						message: "SUCCESS",
+					},
+				});
+
+				const result = await service.SearchLocationByName(name, limit, offset);
+
+				logger.info({
+					SEARCH_LOCATION_BY_NAME_RESPONSE: {
+						SEARCH_LOCATION_BY_NAME_RESPONSE: {
+							message: "SUCCESS",
+						},
+					},
+				});
+
+				return res
+					.status(200)
+					.json({ status: 200, data: result, message: "Success" });
+			} catch (err) {
+				req.error_name = "SEARCH_LOCATION_BY_NAME_ERROR";
+				next(err);
+			}
+		}
+	);
+
 	app.use((err, req, res, next) => {
 		logger.error({
 			API_REQUEST_ERROR: {

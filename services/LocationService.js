@@ -220,4 +220,14 @@ module.exports = class LocationService {
 
 		return { facilities, parking_types, parking_restrictions };
 	}
+
+	async SearchLocationByName(name, limit, offset) {
+		const result = await this.#repository.SearchLocationByName(
+			name,
+			limit,
+			offset
+		);
+
+		return result;
+	}
 };
