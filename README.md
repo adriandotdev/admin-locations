@@ -140,3 +140,79 @@ Bind or Unbind a location to Charging Point Operator.
 - **LOCATION_ID_DOES_NOT_EXISTS**
 - **CPO_OWNER_ID_DOES_NOT_EXISTS**
 - **LOCATION_IS_ALREADY_BINDED**
+
+---
+
+### GET Default Data - `GET /api/v1/locations/data/defaults`
+
+**Description**
+
+Retrieve default data for registration of location
+
+**Authorization: Basic TOKEN**
+
+**Response**
+
+```json
+{
+	"status": 200,
+	"data": {
+		"facilities": [],
+		"parking_types": [],
+		"parking_restrictions": []
+	},
+	"message": "Success"
+}
+```
+
+---
+
+### Upload Images - `POST /api/v1/locations/upload`
+
+**Description**
+
+Uploads location images
+
+---
+
+### Search Location by Name - `GET /locations/:name/:limit/:offset`
+
+**Description**
+
+Search location by name
+
+**Authorization: Bearer TOKEN**
+
+**Parameters**
+
+- **name** - Location name
+- **limit** - Number of rows to return
+- **offset** - Starting row to return
+
+**Response**
+
+```json
+{
+	"status": 200,
+	"data": [
+		{
+			"id": 1,
+			"cpo_owner_id": 1,
+			"name": "Rufino Building",
+			"address": "6784 Ayala Ave, Legazpi Village, Makati, 1200 Metro Manila, Philippines",
+			"address_lat": "14.55920000",
+			"address_lng": "121.01750000",
+			"city": "Makati",
+			"region": "NCR",
+			"postal_code": null,
+			"images": [
+				"https://stg-parkncharge.sysnetph.com/assets/img/sites/site2.jpg",
+				"https://stg-parkncharge.sysnetph.com/assets/img/sites/site3.jpg"
+			],
+			"date_created": "2024-01-30T06:35:00.000Z",
+			"date_modified": "2024-01-30T06:35:01.000Z"
+		}
+	],
+	"message": "Success"
+}
+```

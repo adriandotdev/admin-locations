@@ -50,110 +50,134 @@ module.exports = class LocationService {
 		parking_types,
 		parking_restrictions,
 		images,
+		admin_id,
 	}) {
-		// Request to Google Geocoding API for the data based on the address provided.
-		const geocodedAddress = await axios.get(
-			`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURI(
-				address
-			)}&key=${process.env.GOOGLE_GEO_API_KEY}`
-		);
-
-		/**
-		 * Get the address_components object
-		 *
-		 * This object contains all of the details related to a address such as municipality, region, and postal code.
-		 */
-		const address_components =
-			geocodedAddress.data.results[0]?.address_components;
-
-		// If location is not found.
-		if (!address_components) throw new HttpBadRequest("LOCATION_NOT_FOUND", []);
-
-		// Get the city name when the type is 'locality'
-		const city = address_components.find((component) =>
-			component.types.includes("locality")
-		)?.long_name;
-
-		/**
-		 * Get the region name when the type is 'administrative_area_level_1'
-		 *
-		 * Get the first three letters of the region, convert it to uppercase, and trim it.
-		 */
-		const region = String(
-			address_components.find((component) =>
-				component.types.includes("administrative_area_level_1")
-			)?.short_name
-		)
-			.slice(0, 3)
-			.toUpperCase()
-			.trim();
-
-		/**
-		 * Get the postal code of the address when the type is 'postal_code'
-		 */
-		const postal_code = address_components.find((component) =>
-			component.types.includes("postal_code")
-		)?.long_name;
-
-		// Get the latitude, and longitude of the address
-		const { lat, lng } = geocodedAddress.data.results[0].geometry.location;
-
-		// Get the formatted address.
-		const formatted_address = geocodedAddress.data.results[0].formatted_address;
-
-		// Location Registration
 		try {
-			const result = await this.#repository.RegisterLocation({
-				cpo_owner_id: cpo_owner_id || null,
-				name,
-				address: formatted_address,
-				lat,
-				lng,
-				city,
-				region,
-				postal_code: postal_code || null,
-				images: JSON.stringify(images),
-			});
-
-			const LOCATION_ID = result.insertId;
-
-			// Add location's facilities
-			const newFacilities = facilities.map((facility) => [
-				facility,
-				LOCATION_ID,
-			]);
-
-			await this.#repository.AddLocationFacilities(newFacilities);
-
-			// Add location's parking types
-			const newParkingTypes = parking_types.map((parkingType) => [
-				parkingType.id,
-				LOCATION_ID,
-				parkingType.tag,
-			]);
-
-			await this.#repository.AddLocationParkingTypes(newParkingTypes);
-
-			// Add location's parking restrictions
-			const newParkingRestrictions = parking_restrictions.map(
-				(parking_restriction) => [parking_restriction, LOCATION_ID]
+			// Request to Google Geocoding API for the data based on the address provided.
+			const geocodedAddress = await axios.get(
+				`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURI(
+					address
+				)}&key=${process.env.GOOGLE_GEO_API_KEY}`
 			);
 
-			const parkingRestrictionsResult =
-				await this.#repository.AddLocationParkingRestrictions(
-					newParkingRestrictions
+			/**
+			 * Get the address_components object
+			 *
+			 * This object contains all of the details related to a address such as municipality, region, and postal code.
+			 */
+			const address_components =
+				geocodedAddress.data.results[0]?.address_components;
+
+			// If location is not found.
+			if (!address_components)
+				throw new HttpBadRequest("LOCATION_NOT_FOUND", []);
+
+			// Get the city name when the type is 'locality'
+			const city = address_components.find((component) =>
+				component.types.includes("locality")
+			)?.long_name;
+
+			/**
+			 * Get the region name when the type is 'administrative_area_level_1'
+			 *
+			 * Get the first three letters of the region, convert it to uppercase, and trim it.
+			 */
+			const region = String(
+				address_components.find((component) =>
+					component.types.includes("administrative_area_level_1")
+				)?.short_name
+			)
+				.slice(0, 3)
+				.toUpperCase()
+				.trim();
+
+			/**
+			 * Get the postal code of the address when the type is 'postal_code'
+			 */
+			const postal_code = address_components.find((component) =>
+				component.types.includes("postal_code")
+			)?.long_name;
+
+			// Get the latitude, and longitude of the address
+			const { lat, lng } = geocodedAddress.data.results[0].geometry.location;
+
+			// Get the formatted address.
+			const formatted_address =
+				geocodedAddress.data.results[0].formatted_address;
+
+			// Location Registration
+			try {
+				const result = await this.#repository.RegisterLocation({
+					cpo_owner_id: cpo_owner_id || null,
+					name,
+					address: formatted_address,
+					lat,
+					lng,
+					city,
+					region,
+					postal_code: postal_code || null,
+					images: JSON.stringify(images),
+				});
+
+				const LOCATION_ID = result.insertId;
+
+				// Add location's facilities
+				const newFacilities = facilities.map((facility) => [
+					facility,
+					LOCATION_ID,
+				]);
+
+				await this.#repository.AddLocationFacilities(newFacilities);
+
+				// Add location's parking types
+				const newParkingTypes = parking_types.map((parkingType) => [
+					parkingType.id,
+					LOCATION_ID,
+					parkingType.tag,
+				]);
+
+				await this.#repository.AddLocationParkingTypes(newParkingTypes);
+
+				// Add location's parking restrictions
+				const newParkingRestrictions = parking_restrictions.map(
+					(parking_restriction) => [parking_restriction, LOCATION_ID]
 				);
 
-			if (parkingRestrictionsResult.affectedRows >= 1) return "SUCCESS";
+				const parkingRestrictionsResult =
+					await this.#repository.AddLocationParkingRestrictions(
+						newParkingRestrictions
+					);
 
-			return result;
+				if (parkingRestrictionsResult.affectedRows >= 1) {
+					await this.#repository.AuditTrail({
+						admin_id,
+						cpo_id: null,
+						action: "ADD new location",
+						remarks: "success",
+					});
+
+					return "SUCCESS";
+				}
+
+				await this.#repository.AuditTrail({
+					admin_id,
+					cpo_id: null,
+					action: "ATTEMPT to ADD new location",
+					remarks: "failed",
+				});
+
+				return result;
+			} catch (err) {
+				throw err;
+			}
 		} catch (err) {
-			if (
-				err.message.includes(
-					"Cannot add or update a child row: a foreign key constraint fails"
-				)
-			)
-				throw new HttpBadRequest("CPO_OWNER_ID_DOES_NOT_EXISTS");
+			await this.#repository.AuditTrail({
+				admin_id,
+				cpo_id: null,
+				action: "ATTEMPT to ADD new location",
+				remarks: "failed",
+			});
+			throw err;
 		}
 	}
 
@@ -176,14 +200,34 @@ module.exports = class LocationService {
 	 * @param {Number} locationID - Location's ID
 	 * @returns {Object}
 	 */
-	async BindLocation(cpoOwnerID, locationID) {
-		const result = await this.#repository.BindLocation(cpoOwnerID, locationID);
+	async BindLocation(cpoOwnerID, locationID, admin_id) {
+		try {
+			const result = await this.#repository.BindLocation(
+				cpoOwnerID,
+				locationID
+			);
 
-		const status = result[0][0].STATUS;
+			const status = result[0][0].STATUS;
 
-		if (status !== "SUCCESS") throw new HttpBadRequest(status, []);
+			if (status !== "SUCCESS") throw new HttpBadRequest(status, []);
 
-		return status;
+			await this.#repository.AuditTrail({
+				admin_id,
+				cpo_id: null,
+				action: `BIND location to CPO with ID of ${cpoOwnerID}`,
+				remarks: "success",
+			});
+
+			return status;
+		} catch (err) {
+			await this.#repository.AuditTrail({
+				admin_id,
+				cpo_id: null,
+				action: `ATTEMPT to BIND location to CPO with ID of ${cpoOwnerID}`,
+				remarks: "failed",
+			});
+			throw err;
+		}
 	}
 
 	/**
@@ -193,17 +237,34 @@ module.exports = class LocationService {
 	 * @param {Number} locationID - Location's ID
 	 * @returns {Object}
 	 */
-	async UnbindLocation(cpoOwnerID, locationID) {
-		const result = await this.#repository.UnbindLocation(
-			cpoOwnerID,
-			locationID
-		);
+	async UnbindLocation(cpoOwnerID, locationID, admin_id) {
+		try {
+			const result = await this.#repository.UnbindLocation(
+				cpoOwnerID,
+				locationID
+			);
 
-		const status = result[0][0].STATUS;
+			const status = result[0][0].STATUS;
 
-		if (status !== "SUCCESS") throw new HttpBadRequest(status, []);
+			if (status !== "SUCCESS") throw new HttpBadRequest(status, []);
 
-		return status;
+			await this.#repository.AuditTrail({
+				admin_id,
+				cpo_id: null,
+				action: `UNBIND location from CPO with ID of ${cpoOwnerID}`,
+				remarks: "success",
+			});
+
+			return status;
+		} catch (err) {
+			await this.#repository.AuditTrail({
+				admin_id,
+				cpo_id: null,
+				action: `ATTEMPT to UNBIND location from CPO with ID of ${cpoOwnerID}`,
+				remarks: "failed",
+			});
+			throw err;
+		}
 	}
 
 	/**

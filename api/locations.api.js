@@ -206,6 +206,7 @@ module.exports = (app, upload) => {
 					parking_types,
 					parking_restrictions,
 					images,
+					admin_id: req.id,
 				});
 
 				logger.info({
@@ -311,8 +312,17 @@ module.exports = (app, upload) => {
 				let result = undefined;
 
 				if (action === "bind")
-					result = await service.BindLocation(cpo_owner_id, location_id);
-				else result = await service.UnbindLocation(cpo_owner_id, location_id);
+					result = await service.BindLocation(
+						cpo_owner_id,
+						location_id,
+						req.id
+					);
+				else
+					result = await service.UnbindLocation(
+						cpo_owner_id,
+						location_id,
+						req.id
+					);
 
 				logger.info({
 					BIND_LOCATION_TO_CPO_RESPONSE: {
