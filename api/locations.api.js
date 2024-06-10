@@ -156,12 +156,6 @@ module.exports = (app, upload) => {
 			body("parking_types")
 				.isArray()
 				.withMessage("Property: parking_types must be in type of array"),
-			body("parking_types.*.id")
-				.notEmpty()
-				.withMessage("Missing required parking type property: id"),
-			body("parking_types.*.tag")
-				.notEmpty()
-				.withMessage("Missing required parking type property: tag"),
 			body("parking_restrictions")
 				.isArray()
 				.withMessage("Property: parking_restrictions must be in type of array"),
