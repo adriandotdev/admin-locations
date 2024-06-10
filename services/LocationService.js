@@ -158,9 +158,9 @@ module.exports = class LocationService {
 
 				// Add location's parking types
 				const newParkingTypes = parking_types.map((parkingType) => [
-					parkingType.id,
+					parkingType,
 					LOCATION_ID,
-					parkingType.tag,
+					[1, 3, 4, 5].includes(parkingType) ? "OUTDOOR" : "INDOOR",
 				]);
 
 				await this.#repository.AddLocationParkingTypes(newParkingTypes);
