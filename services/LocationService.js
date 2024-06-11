@@ -34,9 +34,16 @@ module.exports = class LocationService {
 				"Invalid offset. Limit must be in type of number"
 			);
 
+		const totalLocationsInDB = await this.#repository.CountLocations();
 		const result = await this.#repository.GetLocations({ limit, offset });
 
-		return result;
+		return {
+			locations: result,
+			total_returned_locations: result.length,
+			total_locations: totalLocationsInDB[0].total_locations,
+			limit,
+			offset,
+		};
 	}
 
 	/**

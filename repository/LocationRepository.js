@@ -1,6 +1,25 @@
 const mysql = require("../database/mysql");
 
 module.exports = class LocationRepository {
+	CountLocations() {
+		const QUERY = `
+			SELECT 
+				COUNT(*) AS total_locations
+			FROM
+				cpo_locations
+		`;
+
+		return new Promise((resolve, reject) => {
+			mysql.query(QUERY, (err, result) => {
+				if (err) {
+					reject(err);
+				}
+
+				resolve(result);
+			});
+		});
+	}
+
 	/**
 	 * Retrieves a list of locations.
 	 *
