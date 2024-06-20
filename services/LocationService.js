@@ -46,6 +46,16 @@ module.exports = class LocationService {
 		};
 	}
 
+	async GetLocationList() {
+		try {
+			const result = await this.#repository.GetLocationList();
+
+			return result;
+		} catch (err) {
+			throw err;
+		}
+	}
+
 	/**
 	 * Retrieves a list of locations that are not yet bound to any charging point operator.
 	 *

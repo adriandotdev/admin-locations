@@ -20,6 +20,26 @@ module.exports = class LocationRepository {
 		});
 	}
 
+	GetLocationList() {
+		const QUERY = `
+			SELECT 
+				* 
+			FROM 
+				cpo_locations 
+			WHERE cpo_owner_id IS NOT NULL
+		`;
+
+		return new Promise((resolve, reject) => {
+			mysql.query(QUERY, (err, result) => {
+				if (err) {
+					reject(err);
+				}
+
+				resolve(result);
+			});
+		});
+	}
+
 	/**
 	 * Retrieves a list of locations.
 	 *
