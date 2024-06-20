@@ -88,6 +88,40 @@ module.exports = (app, upload) => {
 	);
 
 	app.get(
+		"/admin_locations/api/v1/locations/list",
+		[tokenMiddleware.AccessTokenVerifier()],
+
+		/**
+		 * @param {import('express').Request} req
+		 * @param {import('express').Response} res
+		 */
+		async (req, res, next) => {
+			try {
+				logger.info({
+					GET_LOCATIONS_LIST_REQUEST: {
+						message: "SUCCESS",
+					},
+				});
+
+				const result = await service.GetLocationList();
+
+				logger.info({
+					GET_LOCATIONS_LIST_RESPONSE: {
+						message: "SUCCESS",
+					},
+				});
+
+				return res
+					.status(200)
+					.json({ status: 200, data: result, message: "Success" });
+			} catch (err) {
+				req.error_name = "GET_LOCATIONS_ERROR";
+				next(err);
+			}
+		}
+	);
+
+	app.get(
 		"/admin_locations/api/v1/locations/unbinded",
 		[
 			tokenMiddleware.AccessTokenVerifier(),
